@@ -1,125 +1,135 @@
-path="${1}"
-list="${2}"
-line="${3}"
+#==========================================================================================================================================================================================================================================#
+#	CONFIGURATION :
+#==========================================================================================================================================================================================================================================#
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#	SOFTWARE PATHS
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+SEQUEL_SAMTOOLS="/software/vertres/bin-external/samtools-1.4.1"
 
-preprocess="/nfs/users/nfs_d/ddd1/Work/Projects/004_Assembly_pipelines/Scripts/Awk/preprocess_pacbio_header_data.awk"
-process="/nfs/users/nfs_d/ddd1/Work/Projects/004_Assembly_pipelines/Scripts/Awk/process_preprocessed_header_data.awk"
-sequelstats="/nfs/users/nfs_d/ddd1/Work/Projects/004_Assembly_pipelines/Scripts/Perl/GenerateSEQUELstats.pl"
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#	PIPELINE PATHS
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+SEQUEL_STATS_path="/nfs/users/nfs_d/ddd1/Work/Projects/004_Assembly_pipelines/Scripts/Shell/SEQUELstats"
 
+SEQUEL_extract="${SEQUEL_STATS_path}/SEQUEL_extract.awk"
+SEQUEL_preprocess="${SEQUEL_STATS_path}/SEQUEL_preprocess.awk"
+SEQUEL_process="${SEQUEL_STATS_path}/SEQUEL_process.awk"
+SEQUEL_stats="${SEQUEL_STATS_path}/SEQUEL_stats.pl"
 
-smrtc=`cat "${path}/${list}" | head -n "${line}" | tail -n 1`
+declare -A SPIPE_STEP
 
+SPIPE_STEP["STEP_01"]="${SEQUEL_STATS_path}/SEQUEL_STEP_01.sh"
+SPIPE_STEP["STEP_02"]="${SEQUEL_STATS_path}/SEQUEL_STEP_02.sh"
+SPIPE_STEP["STEP_03"]="${SEQUEL_STATS_path}/SEQUEL_STEP_03.sh"
+SPIPE_STEP["STEP_04"]="${SEQUEL_STATS_path}/SEQUEL_STEP_04.sh"
 
-STEP_01:	Extract
-#============================================================================================================================================================================================================
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-#	[MULTILINE]
-#	samtools view "${path}/${smrtc}.scraps.bam"
-#	| cut -f 1,21,22
-#	| sed -r 's/s(c|z):A://g'
-#	| awk 'BEGIN{}{if($3=="N"){split($1,h,"/|_");printf "%s_%s_%s\t%d\t%d\t%d\t%s\n",h[1],h[2],h[3],h[4],h[5],h[6],$2;}}END{}'
-#	> "${path}/processed/preprocessed/TMP.${smrtc}.sc.txt"
-#
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-#	[MULTILINE]
-#	samtools view "${path}/${smrtc}.subreads.bam"
-#	| cut -f 1
-#	| awk 'BEGIN{}{split($1,h,"/|_");printf "%s_%s_%s\t%d\t%d\t%d\tS\n",h[1],h[2],h[3],h[4],h[5],h[6];}END{}'
-#	> "${path}/processed/preprocessed/TMP.${smrtc}.sr.txt"
-#
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-samtools view "${path}/${smrtc}.scraps.bam"   | cut -f 1,21,22 | sed -r 's/s(c|z):A://g' | awk 'BEGIN{}{if($3=="N"){split($1,h,"/|_");printf "%s_%s_%s\t%d\t%d\t%d\t%s\n",h[1],h[2],h[3],h[4],h[5],h[6],$2;}}END{}' > "${path}/processed/preprocessed/TMP.${smrtc}.sc.txt"
-samtools view "${path}/${smrtc}.subreads.bam" | cut -f 1 | awk 'BEGIN{}{split($1,h,"/|_");printf "%s_%s_%s\t%d\t%d\t%d\tS\n",h[1],h[2],h[3],h[4],h[5],h[6];}END{}' > "${path}/processed/preprocessed/TMP.${smrtc}.sr.txt"
-
-#============================================================================================================================================================================================================
+#==========================================================================================================================================================================================================================================#
 
 
 
-STEP_02:	preprocess
-#============================================================================================================================================================================================================
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-#	[MULTILINE]
-#	cat
-#	"${path}/processed/preprocessed/TMP.${smrtc}.sc.txt"
-#	"${path}/processed/preprocessed/TMP.${smrtc}.sr.txt"
-#	| sort -k2,2n -k3,3n -k4,4n
-#	| awk -f "${preprocess}"
-#	> "${path}/processed/preprocessed/${smrtc}.preprocessed"
-#
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#==========================================================================================================================================================================================================================================#
+#	COMMAND-LINE PARAMETER
+#==========================================================================================================================================================================================================================================#
 
-cat "${path}/processed/preprocessed/TMP.${smrtc}.sc.txt" "${path}/processed/preprocessed/TMP.${smrtc}.sr.txt" | sort -k2,2n -k3,3n -k4,4n | awk -f "${preprocess}" > "${path}/processed/preprocessed/${smrtc}.preprocessed"
+SCRIPT_Name="$(basename $0)"
 
-rm "${path}/processed/preprocessed/TMP.${smrtc}.sc.txt"
-rm "${path}/processed/preprocessed/TMP.${smrtc}.sr.txt"
+if [[ -z "${1:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo \"subreads\" BAM FOFN specified!\n"     ; exit 1 ; fi
+if [[ -z "${2:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo \"scraps\" BAM FOFN specified!\n"       ; exit 2 ; fi
+if [[ -z "${3:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo output directory specified!\n"          ; exit 3 ; fi
+if [[ -z "${4:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo SMRTcell (i.e. line index) selected!\n" ; exit 4 ; fi
+if [[ -z "${5:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo step name for given run specified!\n"   ; exit 5 ; fi
 
-#============================================================================================================================================================================================================
+SPIPE_srfofn="${1}"	# "Subreads" BAM FOFN
+SPIPE_scfofn="${2}"	# "Scraps"   BAM FOFN
+SPIPE_dpath="${3}"	# Output path
+SPIPE_smrtci="${4}"	# Line index for SMRTcell entry in both FOFNs
+SPIPE_step="${5}"	# Step name e.g. "STEP_01"
 
 
+SPIPE_dpath=`echo "${SPIPE_dpath}" | sed -r 's/\/+$//'`
 
-STEP_03:	process
-#============================================================================================================================================================================================================
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-#	[MULTILINE]
-#	cat "${path}/processed/preprocessed/${smrtc}.preprocessed"
-#	| awk 'BEGIN{}{if($3~/[[:digit:]]+H/){print $0 > "/dev/stdout"}else{print $0 > "/dev/stderr"}}END{}'
-#	> "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hp"
-#	2> "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hn"
-#
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-#	[MULTILINE]
-#	cat "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hp"
-#	| awk 'BEGIN{}{if($4~/[[:digit:]]+S/){print $0 > "/dev/stdout"}else{print $0 > "/dev/stderr"}}END{}'
-#	> "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSp"
-#	2> "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSn"
-#
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+if ! [[ -e "${SPIPE_srfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"subreads\" BAM FOFN does not exist!\n" ; exit 6 ; fi
+if ! [[ -e "${SPIPE_scfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"scraps\" BAM FOFN does not exist!\n"   ; exit 7 ; fi
 
-cat "${path}/processed/preprocessed/${smrtc}.preprocessed"        | awk 'BEGIN{}{if($3~/[[:digit:]]+H/){print $0 > "/dev/stdout"}else{print $0 > "/dev/stderr"}}END{}' > "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hp"   2> "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hn"
-cat "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hp" | awk 'BEGIN{}{if($4~/[[:digit:]]+S/){print $0 > "/dev/stdout"}else{print $0 > "/dev/stderr"}}END{}' > "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSp" 2> "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSn"
-
-rm "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hp"
-
-#============================================================================================================================================================================================================
+#==========================================================================================================================================================================================================================================#
 
 
 
-#============================================================================================================================================================================================================
+#==========================================================================================================================================================================================================================================#
+#	PIPELINE PREPARATION
+#==========================================================================================================================================================================================================================================#
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#	INITIALISE VARIABLES
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+SPIPE_srfs=`cat "${SPIPE_srfofn}" | wc -l`	# Count number of files in "subread" FOFN
+SPIPE_scfs=`cat "${SPIPE_scfofn}" | wc -l`	# Count number of files in "scraps"  FOFN
 
-cat "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hn"   | awk -f "${process}" > "${path}/processed/per_smrt_cell/Hn/${smrtc}.processed.Hn"
-cat "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSn" | awk -f "${process}" > "${path}/processed/per_smrt_cell/HpSn/${smrtc}.processed.HpSn"
-cat "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSp" | awk -f "${process}" > "${path}/processed/per_smrt_cell/HpSp/${smrtc}.processed.HpSp"
+if [[ "${SPIPE_srfs}" -ne "${SPIPE_scfs}"   ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNumber of \"subreads\" and \"scraps\" files does not match!\n" ; exit 8 ; fi
+if [[ "${SPIPE_srfs}" -lt "${SPIPE_smrtci}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tSMRTcell index larger than number of files in FOFNs!\n"        ; exit 9 ; fi
 
-rm "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.Hn"
-rm "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSn"
-rm "${path}/processed/preprocessed/TMP.${smrtc}.preprocessed.HpSp"
+SPIPE_srbam=`cat "${SPIPE_srfofn}" | head -n "${SPIPE_smrtci}" | tail -n 1`			# Select "subreads" BAM
+SPIPE_scbam=`cat "${SPIPE_scfofn}" | head -n "${SPIPE_smrtci}" | tail -n 1`			# Select "scraps"   BAM
+SPIPE_srsmrtc=`echo "${SPIPE_srbam}" | sed -r 's/^.{0,}\/(.+)\.subreads\.bam$/\1/'`	# Extract SMRTcell ID for "subreads" BAM
+SPIPE_scsmrtc=`echo "${SPIPE_scbam}" | sed -r 's/^.{0,}\/(.+)\.scraps\.bam$/\1/'`	# Extract SMRTcell ID for "scraps"   BAM
 
-#============================================================================================================================================================================================================
+if [[ "${SPIPE_srsmrtc}" -ne "${SPIPE_scsmrtc}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tSMRTcell IDs for \"subreads\" (${SPIPE_srsmrtc}) and \"scraps\" (${SPIPE_scsmrtc}) BAM file do not match!\n" ; exit 10 ; fi
+
+SPIPE_smrtc="${SPIPE_srsmrtc}"
+
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#	GENERATE PIPELINE FOLDER STRUCTURE FOR SMRTcell
+#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+SPIPE_out="${SPIPE_dpath}/${SPIPE_smrtc}/out"
+SPIPE_err="${SPIPE_dpath}/${SPIPE_smrtc}/err"
+SPIPE_ext="${SPIPE_dpath}/${SPIPE_smrtc}/extracted"
+SPIPE_pre="${SPIPE_dpath}/${SPIPE_smrtc}/preprocessed"
+SPIPE_pro="${SPIPE_dpath}/${SPIPE_smrtc}/processed"
+SPIPE_sta="${SPIPE_dpath}/${SPIPE_smrtc}/stats"
+
+mkdir -p "${SPIPE_dpath}"
+
+mkdir -p "${SPIPE_out}"
+mkdir -p "${SPIPE_err}"
+mkdir -p "${SPIPE_ext}"
+mkdir -p "${SPIPE_pre}"
+mkdir -p "${SPIPE_pro}"
+mkdir -p "${SPIPE_sta}"
+
+#==========================================================================================================================================================================================================================================#
 
 
 
-STEP_04:	Compute stats
-#============================================================================================================================================================================================================
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#
-#	[MULTILINE]
-#	perl "${sequelstats}"
-#	--Hn "${path}/processed/per_smrt_cell/Hn/${smrtc}.processed.Hn"
-#	--HpSn "${path}/processed/per_smrt_cell/HpSn/${smrtc}.processed.HpSn"
-#	--HpSp "${path}/processed/per_smrt_cell/HpSp/${smrtc}.processed.HpSp"
-#
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#==========================================================================================================================================================================================================================================#
+#	RUN PREPARATION :
+#==========================================================================================================================================================================================================================================#
 
-perl "${sequelstats}" --Hn "${path}/processed/per_smrt_cell/Hn/${smrtc}.processed.Hn" --HpSn "${path}/processed/per_smrt_cell/HpSn/${smrtc}.processed.HpSn" --HpSp "${path}/processed/per_smrt_cell/HpSp/${smrtc}.processed.HpSp"
+export SEQUEL_SAMTOOLS
+export SEQUEL_extract
+export SEQUEL_preprocess
+export SEQUEL_process
+export SEQUEL_stats
 
-mv "${path}/processed/per_smrt_cell/Hn/${smrtc}.processed.Hn".*     "${path}/processed/per_smrt_cell/Hn/for_R/"
-mv "${path}/processed/per_smrt_cell/HpSn/${smrtc}.processed.HpSn".* "${path}/processed/per_smrt_cell/HpSn/for_R/"
-mv "${path}/processed/per_smrt_cell/HpSp/${smrtc}.processed.HpSp".* "${path}/processed/per_smrt_cell/HpSp/for_R/"
+export SPIPE_dpath
+export SPIPE_srbam
+export SPIPE_scbam
+export SPIPE_smrtc
+export SPIPE_step
 
-#============================================================================================================================================================================================================
+export SPIPE_out
+export SPIPE_err
+export SPIPE_ext
+export SPIPE_pre
+export SPIPE_pro
+export SPIPE_sta
+
+#==========================================================================================================================================================================================================================================#
+
+
+
+#==========================================================================================================================================================================================================================================#
+#	RUN :
+#==========================================================================================================================================================================================================================================#
+
+"${SPIPE_STEP[${SPIPE_step}]}"
+
+#==========================================================================================================================================================================================================================================#
