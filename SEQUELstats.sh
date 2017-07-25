@@ -29,15 +29,17 @@ SCRIPT_Name="$(basename $0)"
 if [[ -z "${1:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo \"subreads\" BAM FOFN specified!\n" ; exit 1 ; fi
 if [[ -z "${2:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo \"scraps\" BAM FOFN specified!\n"   ; exit 2 ; fi
 if [[ -z "${3:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo output directory specified!\n"      ; exit 3 ; fi
+if [[ -z "${4:+x}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNo sample name specified!\n"           ; exit 4 ; fi
 
 SEQL_srfofn="${1}"	# "Subreads" BAM FOFN
 SEQL_scfofn="${2}"	# "Scraps"   BAM FOFN
 SEQL_dpath="${3}"	# Output path
+SEQL_sname="${4}"	# Sample name e.g. "fAnaTes1"
 
 SEQL_dpath=`echo "${SEQL_dpath}" | sed -r 's/\/+$//'`
 
-if ! [[ -e "${SEQL_srfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"subreads\" BAM FOFN does not exist!\n" ; exit 4 ; fi
-if ! [[ -e "${SEQL_scfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"scraps\" BAM FOFN does not exist!\n"   ; exit 5 ; fi
+if ! [[ -e "${SEQL_srfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"subreads\" BAM FOFN does not exist!\n" ; exit 5 ; fi
+if ! [[ -e "${SEQL_scfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"scraps\" BAM FOFN does not exist!\n"   ; exit 6 ; fi
 
 #==========================================================================================================================================================================================================================================#
 
@@ -52,7 +54,7 @@ if ! [[ -e "${SEQL_scfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"scraps\" B
 SEQL_srfs=`cat "${SEQL_srfofn}" | wc -l`
 SEQL_scfs=`cat "${SEQL_scfofn}" | wc -l`
 
-if [[ "${SEQL_srfs}" -ne "${SEQL_scfs}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNumber of \"subreads\" and \"scraps\" files does not match!\n" ; exit 6 ; fi
+if [[ "${SEQL_srfs}" -ne "${SEQL_scfs}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNumber of \"subreads\" and \"scraps\" files does not match!\n" ; exit 7 ; fi
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #	GENERATE PIPELINE FOLDER STRUCTURE
@@ -145,7 +147,7 @@ do
 			rm "${SEQL_block}".*	# Remove "road blocks" to allow pipeline to continue with the next step
 		else
 			echo -e "\n[${SCRIPT_Name}]:\t${SPIPE_STEPS[${i}]} failed, pipeline terminated!\n"
-			exit 7
+			exit 8
 		fi
 		#-
 		
@@ -164,6 +166,6 @@ mv "${SEQL_dpath}/"*"/stats/Hn/"*.*   "${SEQL_sta}/Hn"
 mv "${SEQL_dpath}/"*"/stats/HpSn/"*.* "${SEQL_sta}/HpSn"
 mv "${SEQL_dpath}/"*"/stats/HpSp/"*.* "${SEQL_sta}/HpSp"
 
-### CONTINUE HERE ... ###
+"${SEQUEL_RSCRIPT}" "${SEQUEL_plot}" "${SEQL_sta}" "${SEQL_sname}"
 
 #==========================================================================================================================================================================================================================================#

@@ -74,6 +74,8 @@ chk=$?	# get 'awk' exit code
 if [[ "${chk}" -ne 0 ]] ; then
 	echo -e "\n[${SCRIPT_Name}]:\t'awk' terminated with exit code \"${chk}\" while separating reads!\n"
 	exit 7
+else
+	rm "${SPIPE_pre}/PRE.${SPIPE_smrtc}.txt"	# Remove preprocessed input file (not needed anymore once the data is separated)
 fi
 #..........................................................................................................................................................................................................................................#
 
