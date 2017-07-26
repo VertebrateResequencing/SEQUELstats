@@ -143,8 +143,6 @@ do
 			tar -czf "${SEQL_step}.ERR.tar.gz" "${SEQL_step}".*.err
 			if [[ -e "${SEQL_step}.ERR.tar.gz" ]] && [[ -s "${SEQL_step}.ERR.tar.gz" ]] ; then rm "${SEQL_step}".*.err; fi
 			#--
-			
-			rm "${SEQL_block}".*	# Remove "road blocks" to allow pipeline to continue with the next step
 		else
 			echo -e "\n[${SCRIPT_Name}]:\t${SPIPE_STEPS[${i}]} failed, pipeline terminated!\n"
 			exit 8
