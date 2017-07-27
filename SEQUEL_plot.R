@@ -29,6 +29,8 @@ PacBio.stats<-NULL
 PacBio.hists<-NULL
 PacBio.other<-NULL
 
+
+#- Parse data produced by "SEQUEL_stats.pl"
 for (h in 1:length(statSets)) {
 	setwd(paste(BASE, "/", statSets[h], sep=""))
 	
@@ -77,6 +79,8 @@ for (h in 1:length(statSets)) {
 		}
 	}
 }
+#-
+
 
 PacBio.max<-matrix(rep(0,(2*length(names(PacBio.hists)))), ncol=2)
 rownames(PacBio.max)<-names(PacBio.hists)
@@ -151,7 +155,7 @@ dev.off()
 
 
 
-#-	3)	SMRT cell raw output plot
+#-	2)	SMRT cell raw output plot
 ppRow<-800
 ppCol<-800
 
@@ -241,7 +245,7 @@ dev.off()
 
 
 
-#-	4)	SMRT cell processed output plot
+#-	3)	SMRT cell processed output plot
 ppRow<-800
 ppCol<-800
 
@@ -331,7 +335,7 @@ dev.off()
 
 
 
-#-	5)	Sequencing efficiency plot
+#-	4)	Sequencing efficiency plot
 ppRow<-800
 ppCol<-800
 
@@ -378,7 +382,7 @@ dev.off()
 
 
 
-#-	6)	Sequencing run yield & efficiency
+#-	5)	Sequencing run yield & efficiency
 ppRow<-300
 ppCol<-300
 
@@ -408,7 +412,7 @@ dev.off()
 
 
 
-#-	7)	Estimated library size distribution
+#-	6)	Estimated library size distribution
 ppRow<-300
 ppCol<-480
 
@@ -439,7 +443,7 @@ dev.off()
 
 
 
-#-	8)	Estimated library size distribution (full data)
+#-	7)	Estimated library size distribution (full data)
 ppRow<-300
 ppCol<-480
 
@@ -474,59 +478,4 @@ plot(tmp, xlim=c(0,60000), lwd=2, ylim=c(0,yMax), ylab="", xaxt="n", yaxt="n", b
 
 dev.off()
 #-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#	#-	2)	Read length characteristics
-#	#dev.size("px")	->	1303  866
-#	png(paste(SPEC, "Read_length_characteristics.png", sep="."), width=1600, height=900)
-#	par(mfrow=c(2,3), las=1)
-#	
-#	lCol<-"white"
-#	pMax<-24000
-#	pStp<-2000
-#	sMax<-24000
-#	sStp<-2000
-#	
-#	barplot(PReadStats[,"Mean"], names.arg=rownames(PReadStats), col="red4", border=NA, ylim=c(0,pMax), xlab="Runtime in minutes", main="Mean polymerase read length", yaxt="n")
-#	axis(2, pos=0, at=seq(0,pMax,pStp), labels=(paste(seq(0,(pMax/1000),(pStp/1000)), "k", sep="")))
-#	for (i in seq(0,pMax,pStp)) { lines(c(0,(length(rownames(PReadStats))+4)), c(i,i), lwd=1, lty=3, col=lCol)}
-#	barplot(PReadStats[,"Median"], names.arg=rownames(PReadStats), col="red4", border=NA, ylim=c(0,pMax), xlab="Runtime in minutes", main="Median polymerase read length", yaxt="n")
-#	axis(2, pos=0, at=seq(0,pMax,pStp), labels=(paste(seq(0,(pMax/1000),(pStp/1000)), "k", sep="")))
-#	for (i in seq(0,pMax,pStp)) { lines(c(0,(length(rownames(PReadStats))+4)), c(i,i), lwd=1, lty=3, col=lCol)}
-#	barplot(PReadStats[,"N50"], names.arg=rownames(PReadStats), col="red4", border=NA, ylim=c(0,pMax), xlab="Runtime in minutes", main="N50 polymerase read length", yaxt="n")
-#	axis(2, pos=0, at=seq(0,pMax,pStp), labels=(paste(seq(0,(pMax/1000),(pStp/1000)), "k", sep="")))
-#	for (i in seq(0,pMax,pStp)) { lines(c(0,(length(rownames(PReadStats))+4)), c(i,i), lwd=1, lty=3, col=lCol)}
-#	
-#	barplot(SReadStats[,"Mean"], names.arg=rownames(SReadStats), col="green4", border=NA, ylim=c(0,sMax), xlab="Runtime in minutes", main="Mean subread length", yaxt="n")
-#	axis(2, pos=0, at=seq(0,sMax,sStp), labels=(paste(seq(0,(sMax/1000),(sStp/1000)), "k", sep="")))
-#	for (i in seq(0,sMax,sStp)) { lines(c(0,(length(rownames(SReadStats))+4)), c(i,i), lwd=1, lty=3, col=lCol)}
-#	barplot(SReadStats[,"Median"], names.arg=rownames(SReadStats), col="green4", border=NA, ylim=c(0,sMax), xlab="Runtime in minutes", main="Median subread length", yaxt="n")
-#	axis(2, pos=0, at=seq(0,sMax,sStp), labels=(paste(seq(0,(sMax/1000),(sStp/1000)), "k", sep="")))
-#	for (i in seq(0,sMax,sStp)) { lines(c(0,(length(rownames(SReadStats))+4)), c(i,i), lwd=1, lty=3, col=lCol)}
-#	barplot(SReadStats[,"N50"], names.arg=rownames(SReadStats), col="green4", border=NA, ylim=c(0,sMax), xlab="Runtime in minutes", main="N50 subread length", yaxt="n")
-#	axis(2, pos=0, at=seq(0,sMax,sStp), labels=(paste(seq(0,(sMax/1000),(sStp/1000)), "k", sep="")))
-#	for (i in seq(0,sMax,sStp)) { lines(c(0,(length(rownames(SReadStats))+4)), c(i,i), lwd=1, lty=3, col=lCol)}
-#	
-#	dev.off()
-#	#-
-
 

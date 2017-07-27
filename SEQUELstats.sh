@@ -51,8 +51,8 @@ if ! [[ -e "${SEQL_scfofn}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\t\"scraps\" B
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #	INITIALISE VARIABLES
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-SEQL_srfs=`cat "${SEQL_srfofn}" | wc -l`
-SEQL_scfs=`cat "${SEQL_scfofn}" | wc -l`
+SEQL_srfs=`cat "${SEQL_srfofn}" | wc -l`	# Count number of files in "subread" FOFN
+SEQL_scfs=`cat "${SEQL_scfofn}" | wc -l`	# Count number of files in "scraps"  FOFN
 
 if [[ "${SEQL_srfs}" -ne "${SEQL_scfs}" ]] ; then echo -e "\n[${SCRIPT_Name}]:\tNumber of \"subreads\" and \"scraps\" files does not match!\n" ; exit 7 ; fi
 
@@ -160,9 +160,11 @@ done
 #	PLOT
 #==========================================================================================================================================================================================================================================#
 
+#- Move data from invidual folders per SMRTcell into one folder per type (i.e. Hn/HpSn/HpSp)
 mv "${SEQL_dpath}/"*"/stats/Hn/"*.*   "${SEQL_sta}/Hn"
 mv "${SEQL_dpath}/"*"/stats/HpSn/"*.* "${SEQL_sta}/HpSn"
 mv "${SEQL_dpath}/"*"/stats/HpSp/"*.* "${SEQL_sta}/HpSp"
+#-
 
 "${SEQUEL_RSCRIPT}" "${SEQUEL_plot}" "${SEQL_sta}" "${SEQL_sname}"
 
