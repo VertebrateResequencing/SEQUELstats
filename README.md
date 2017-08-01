@@ -72,7 +72,7 @@ Based on these files seven plots are generated:
  * **"[SAMPLE_NAME].SMRT_cell.efficiency.png"**  
 	PSR vs. ZOR plot (one dot/SMRTcell). All dots on the right border just underneath the 0.5 line would be optimal for assembly
  * **"[SAMPLE_NAME].SMRT_cell.raw_output.png"**  
-	Read length stats ("Median"=red/white, "Mean"=black, "N50"=black/white) vs. SMRTcell yield (based on polymerase reads, one line per SMRTcell). PacBio advertises SEQUEL SMRTcells with 5-8GB of data with polymerase read N50 of >=20kb
+	Read length stats ("Median"=red/white, "Mean"=black, "N50"=black/white) vs. SMRTcell yield (based on polymerase reads, one line per SMRTcell). PacBio [advertises](http://www.pacb.com/wp-content/uploads/2015/09/Revolutionize-Genomics-with-SMRT-Sequencing.pdf "see page 6") SEQUEL SMRTcells with 5-8Gb of data with polymerase read N50 of >20kb
  * **"[SAMPLE_NAME].SMRT_cell.processed_output.png"**  
 	Read length stats vs. SMRTcell yield (same as above but this time using only the LSR)
  * **"[SAMPLE_NAME].seq_run.yield_and_efficiency.png"**  
