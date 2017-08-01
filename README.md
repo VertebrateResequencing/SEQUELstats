@@ -4,7 +4,7 @@
 
 ## Dependencies
 
-**SEQUELstats** uses `samtools` (v1.4.1) for processing the SEQUEL BAM files The pipeline itself is mainly written in `bash`, `awk`, `perl`, and `R`:
+**SEQUELstats** uses `samtools` (v1.4.1) for processing the SEQUEL BAM files. The pipeline itself is mainly written in `bash`, `awk`, `perl`, and `R`:
 
  * GNU bash (v4.2.25(1)-release)
  * GNU Awk (v3.1.8)
@@ -21,13 +21,15 @@ In addition, the R script makes use of the `RColorBrewer` package.
 
 ## Introduction
 
-**SEQUELstats** uses a set of PacBio BAM files (both, the **subreads** and **scraps** file per SMRTcell) as provided by the **SMRT-Link** software for **SEQUEL** sequencing runs as input. The sequence header for those BAM files has to use the following format:
+**SEQUELstats** uses as input a set of PacBio BAM files (both, the **subreads** and **scraps** file per SMRTcell) as provided by the **SMRT-Link** software for **SEQUEL** sequencing runs.
+
+The sequence header for those BAM files has to use the following format:
 
 _**`^m\d+_\d+_\d+/\d+/\d+_\d+$`**_
 
 _(e.g. "m54097\_170223\_195514/4784691/0\_7327")_
 
-BAM files are provided as two "file-of-filenames" (one for **subreads** and one for **scraps**, each containing the absolute paths to the BAMs) that have to be in the same sorting order (i.e. BAM files for each SMRTcell have to be on the same line in both files). The pipeline will then perform four steps per SMRTcell before generating the plots:
+BAM files are provided as two "file-of-filenames" (one for **subreads** and one for **scraps**, each containing the absolute paths to the BAMs) that have to be in the same order (i.e. BAM files for each SMRTcell have to be on the same line in both files). The pipeline will then perform four steps per SMRTcell before generating the plots:
 
  * **_STEP_01_**: Extracts the necessary information for analysis from the **subreads** and **scraps** BAM file per SMRTcell
  * **_STEP_02_**: Preprocesses the extracted data and reconstructs the original ZMW read for each ZMW
@@ -42,7 +44,7 @@ The three data sets generated for each SMRTcell are:
 |:-------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
 | **Hn**<br>("High quality region: **negative**")                          | Basecaller couldn't find a region in the ZMW read it would consider 'proper' sequence   |
 | **HpSn**<br>("High quality region: **positive**; Subread: **negative**") | A good ZMW read interval was found but for some reason the sequence is considered 'bad' |
-| **HpSp**<br>("High quality region: **negative**; Subread: **positive**") | Fully useful data                                                                       |
+| **HpSp**<br>("High quality region: **positive**; Subread: **positive**") | Fully useful data                                                                       |
 
 > _The first two types are classified by PacBio as useless and hence stored in the **scraps** file together with removed adapters and barcodes. For information about the content of the **scraps** file check [here](http://pacbiofileformats.readthedocs.io/en/3.0/BAM.html#how-to-annotate-scrap-reads "How to annotate scrap reads?")_
 
@@ -57,11 +59,11 @@ The generated stats output files are :
 | **\*.aCnt**  | **HpSp**    | List of LSRs (length per LSR) flanked by only one adapter                            |
 | **\*.lFlg**  | **HpSp**    | List of LSRs (length per LSR) flanked by adapter on both sides                       |
 
-> _**ZR**="ZMW read"_
-> _**PR**="Polymerase read"_
-> _**SR**/**LSR**="Subread"/"Longest subread"_
-> _**ZOR**="ZMW occupancy ratio" (i.e. how many of the ZMWs in the SMRTcell contained at least one DNA fragment for sequencing. Values >0.5 usually indicate overloading)_
-> _**PSR**="Polymerase read to Subread ratio" (for assebmly a PSR=1 would be ideal as in that case the fragment would have been read only once without reaching the end)_
+> _**ZR**="ZMW read"_  
+> _**PR**="Polymerase read"_  
+> _**SR**/**LSR**="Subread"/"Longest subread"_  
+> _**ZOR**="ZMW occupancy ratio" (i.e. how many of the ZMWs in the SMRTcell contained at least one DNA fragment for sequencing. Values >0.5 usually indicate overloading)_  
+> _**PSR**="Polymerase read to Subread ratio" (for assebmly a PSR=1 would be ideal as in that case the fragment would have been read only once without reaching the end)_  
 
 <br>
 

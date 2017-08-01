@@ -33,7 +33,7 @@
 	
 	parse_LQ_data($PARAMS{'Hn'}, \%g_LQdata);				# a.k.a. "Hn"   = "High quality region: negative" (i.e. the basecaller couldn't find a region in the ZMW read it would consider 'proper' sequence)
 	parse_MQ_data($PARAMS{'HpSn'}, \%g_MQdata);				# a.k.a. "HpSn" = "High quality region: positive; Subread: negative" (i.e. a good ZMW read interval was found but for some reason the sequence is considered 'bad')
-	parse_HQ_data($PARAMS{'HpSp'}, \%g_HQdata, \@g_hist);	# a.k.a. "HpSp" = "High quality region: negative; Subread: positive" (i.e. that's the good stuff ;)
+	parse_HQ_data($PARAMS{'HpSp'}, \%g_HQdata, \@g_hist);	# a.k.a. "HpSp" = "High quality region: positive; Subread: positive" (i.e. that's the good stuff ;)
 	
 	print_data($PARAMS{'Hn'}, $PARAMS{'HpSn'}, $PARAMS{'HpSp'}, \%g_LQdata, \%g_MQdata, \%g_HQdata, \@g_hist);
 	
